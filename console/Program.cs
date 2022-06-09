@@ -9,7 +9,4 @@ using IHost host = Host.CreateDefaultBuilder(args)
 		services.ConfigureLibServices())
 	.Build();
 
-ITestService service = host.Services.GetService<ITestService>();
-
-Test test = await service.GetTestAsync();
-Console.WriteLine(test.Message);
+Console.WriteLine("hello worold");
