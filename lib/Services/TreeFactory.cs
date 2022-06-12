@@ -97,7 +97,7 @@ public class TreeFactory
 
 			alreadyVisited.Add(node);
 
-			foreach  (TreeNode child in uplineToChildren.GetChildren(node, alreadyVisited))
+			foreach (TreeNode child in uplineToChildren.GetChildren(node, alreadyVisited))
 			{
 				traversal.Push(child);
 			}
