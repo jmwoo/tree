@@ -7,8 +7,8 @@ public static class TreeExtensions
 {
 	public static List<TreeNode> GetChildren(this Dictionary<int, List<TreeNode>> nodeToChildren, TreeNode node, HashSet<TreeNode>? alreadyVisited = null)
 	{
-		List<TreeNode> children = nodeToChildren.ContainsKey(node.AssociateId)
-			? nodeToChildren[node.AssociateId]
+		List<TreeNode> children = nodeToChildren.ContainsKey(node.AccountId)
+			? nodeToChildren[node.AccountId]
 			: Array.Empty<TreeNode>().ToList();
 
 		if (alreadyVisited != null && children.Any())
@@ -20,61 +20,60 @@ public static class TreeExtensions
 	}
 }
 
+public enum TreeBuildMethod
+{
+	Recursive,
+	Iterative
+}
+
 public class TreeFactory
 {
-	public static Tree BuildTree(IEnumerable<TreeNode> nodes)
+	public static Tree BuildTree(IEnumerable<TreeNode> nodes, TreeBuildMethod treeBuildMethod)
 	{
 		if (nodes == null || !nodes.Any())
 		{
 			throw new InvalidTreeException("nodes is null or empty");
 		}
 
-		Dictionary<int, TreeNode> idToNode = nodes.ToDictionary(a => a.AssociateId);
+		Dictionary<int, TreeNode> idToNode = nodes.ToDictionary(a => a.AccountId);
 
-		Dictionary<int, List<TreeNode>> uplineToChildren = nodes
-			.GroupBy(a => a.UplineAssociateId)
+		Dictionary<int, List<TreeNode>> parentToChildren = nodes
+			.GroupBy(a => a.ParentAccountId)
 			.ToDictionary(a => a.Key, a => a.ToList());
 
-		List<TreeNode> roots = nodes
-			.Where(a => a.UplineAssociateId == 0)
-			.ToList();
+		TreeNode root = nodes.Single(a => a.ParentAccountId == 0);
 
-		if (!roots.Any())
+		if (treeBuildMethod == TreeBuildMethod.Iterative)
 		{
-			throw new InvalidTreeException("no root found");
+			BuildTree_Iterative(root, parentToChildren);
 		}
-
-		if (roots.Count > 1)
+		else if (treeBuildMethod == TreeBuildMethod.Recursive)
 		{
-			throw new InvalidTreeException("more than one root");
+			BuildTree_Recursive(root, parentToChildren, new HashSet<TreeNode>());
 		}
-
-		TreeNode root = roots.Single();
-
-		BuildTree_Iterative(root, uplineToChildren);
 
 		return new Tree(root, idToNode);
 	}
 
-	public static void BuildTree_Recurse(TreeNode node, Dictionary<int, List<TreeNode>> uplineToChildren, HashSet<TreeNode> alreadyTraversed)
+	public static void BuildTree_Recursive(TreeNode node, Dictionary<int, List<TreeNode>> parentToChildren, HashSet<TreeNode> alreadyVisited)
 	{
 		if (node == null)
 		{
 			return;
 		}
 
-		List<TreeNode> children = uplineToChildren.GetChildren(node, alreadyTraversed);
+		alreadyVisited.Add(node);
+
+		List<TreeNode> children = parentToChildren.GetChildren(node, alreadyVisited);
 
 		foreach (TreeNode child in children)
 		{
-			BuildTree_Recurse(child, uplineToChildren, alreadyTraversed);
-			child.UplineAssociateId = node.AssociateId;
-			child.UplineTreeNode = node;
+			BuildTree_Recursive(child, parentToChildren, alreadyVisited);
+			child.ParentAccountId = node.AccountId;
+			child.Parent = node;
 		}
 
-		alreadyTraversed.Add(node);
-
-		node.ChildTreeNodes = children;
+		node.Children = children;
 	}
 
 	public static void BuildTree_Iterative(TreeNode? root, Dictionary<int, List<TreeNode>> uplineToChildren)
@@ -111,11 +110,11 @@ public class TreeFactory
 
 			foreach (TreeNode child in children)
 			{
-				child.UplineAssociateId = node.AssociateId;
-				child.UplineTreeNode = node;
+				child.ParentAccountId = node.AccountId;
+				child.Parent = node;
 			}
 
-			node.ChildTreeNodes = children;
+			node.Children = children;
 		}
 	}
 }
