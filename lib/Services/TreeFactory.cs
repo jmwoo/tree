@@ -7,16 +7,16 @@ public static class TreeExtensions
 {
 	public static List<TreeNode> GetChildren(this Dictionary<int, List<TreeNode>> nodeToChildren, TreeNode node, HashSet<TreeNode>? alreadyVisited = null)
 	{
-		List<TreeNode> children = nodeToChildren.ContainsKey(node.AccountId)
+		IEnumerable<TreeNode> children = nodeToChildren.ContainsKey(node.AccountId)
 			? nodeToChildren[node.AccountId]
-			: Array.Empty<TreeNode>().ToList();
+			: Enumerable.Empty<TreeNode>();
 
 		if (alreadyVisited != null && children.Any())
 		{
-			children = children.Where(a => !alreadyVisited.Contains(a)).ToList();
+			children = children.Where(a => !alreadyVisited.Contains(a));
 		}
 
-		return children;
+		return children.ToList();
 	}
 }
 
