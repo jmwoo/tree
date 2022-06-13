@@ -41,7 +41,21 @@ public class TreeFactory
 			.GroupBy(a => a.ParentAccountId)
 			.ToDictionary(a => a.Key, a => a.ToList());
 
-		TreeNode root = nodes.Single(a => a.ParentAccountId == 0);
+		List<TreeNode> roots = nodes
+			.Where(a => a.ParentAccountId == 0)
+			.ToList();
+
+		if (!roots.Any())
+		{
+			throw new InvalidTreeException("no root found");
+		}
+
+		if (roots.Count > 1)
+		{
+			throw new InvalidTreeException("more than one root found");
+		}
+
+		TreeNode root = roots.Single();
 
 		if (treeBuildMethod == TreeBuildMethod.Iterative)
 		{
@@ -76,7 +90,7 @@ public class TreeFactory
 		node.Children = children;
 	}
 
-	public static void BuildTree_Iterative(TreeNode? root, Dictionary<int, List<TreeNode>> uplineToChildren)
+	public static void BuildTree_Iterative(TreeNode? root, Dictionary<int, List<TreeNode>> parentToChildren)
 	{
 		if (root == null)
 		{
@@ -96,7 +110,7 @@ public class TreeFactory
 
 			alreadyVisited.Add(node);
 
-			foreach (TreeNode child in uplineToChildren.GetChildren(node, alreadyVisited))
+			foreach (TreeNode child in parentToChildren.GetChildren(node, alreadyVisited))
 			{
 				traversal.Push(child);
 			}
@@ -106,7 +120,7 @@ public class TreeFactory
 		{
 			TreeNode node = order.Pop();
 
-			List<TreeNode> children = uplineToChildren.GetChildren(node);
+			List<TreeNode> children = parentToChildren.GetChildren(node);
 
 			foreach (TreeNode child in children)
 			{

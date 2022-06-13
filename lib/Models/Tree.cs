@@ -1,7 +1,7 @@
 ﻿using System;
 using lib.Models;
 
-namespace lib.Services;
+namespace lib.Models;
 
 public interface ITree
 {
