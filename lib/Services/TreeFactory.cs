@@ -131,5 +131,54 @@ public class TreeFactory
 			node.Children = children;
 		}
 	}
+
+	public static List<TreeNode> GetNodeSet1()
+	{
+		return new()
+		{
+			new TreeNode { AccountId = 1, ParentAccountId = 0 },
+			new TreeNode { AccountId = 2, ParentAccountId = 1 },
+			new TreeNode { AccountId = 3, ParentAccountId = 2 },
+			new TreeNode { AccountId = 4, ParentAccountId = 2 },
+			new TreeNode { AccountId = 5, ParentAccountId = 3 },
+			new TreeNode { AccountId = 6, ParentAccountId = 3 },
+		};
+	}
+
+	public static List<TreeNode> GetNodeSetN(int size)
+	{
+
+		TreeNode root = new() { AccountId = 1, ParentAccountId = 0 };
+
+		List<TreeNode> allNodes = new() { root };
+
+
+		int chunkSize = 25;
+
+		if (size < 5)
+		{
+			chunkSize = 1;
+		}
+		else if (size < 25)
+		{
+			chunkSize = 5;
+		}
+
+		foreach (int[] chunk in Enumerable.Range(2, size).Chunk(chunkSize))
+		{
+			List<TreeNode> newNodes = chunk
+				.Select(i => new TreeNode { AccountId = i })
+				.ToList();
+
+			foreach (var newNode in newNodes)
+			{
+				newNode.ParentAccountId = allNodes[Random.Shared.Next(0, allNodes.Count)].AccountId;
+			}
+
+			allNodes.AddRange(newNodes);
+		}
+
+		return allNodes;
+	}
 }
 

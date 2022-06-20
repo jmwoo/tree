@@ -9,15 +9,7 @@ namespace test
 		[Fact]
 		public void Test()
 		{
-			List<TreeNode> nodes = new()
-			{
-				new TreeNode { AccountId = 1, ParentAccountId = 0 },
-				new TreeNode { AccountId = 2, ParentAccountId = 1 },
-				new TreeNode { AccountId = 3, ParentAccountId = 2 },
-				new TreeNode { AccountId = 4, ParentAccountId = 2 },
-				new TreeNode { AccountId = 5, ParentAccountId = 3 },
-				new TreeNode { AccountId = 6, ParentAccountId = 3 },
-			};
+			List<TreeNode> nodes = TreeFactory.GetNodeSet1();
 
 			BuildAndTestTree(nodes, tree =>
 			{
